@@ -1,34 +1,42 @@
-// hooks.js
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-export const useFlip = () => {
-  const [isFlipped, setFlipped] = useState(false);
+function useFlip(initialFlipState = true) {
+  const [isFlipped, setFlipped] = useState(initialFlipState);
 
-  const toggleFlip = () => {
-    setFlipped(!isFlipped);
+  const flip = () => {
+    setFlipped(isUp => !isUp);
   };
 
-  return [isFlipped, toggleFlip];
-};
+  return [isFlipped, flip];
+}
 
-export const useAxios = (url) => {
-  const [data, setData] = useState([]);
+function useAxios(keyInLS, baseUrl) {
+  const [responses, setResponses] = useLocalStorage(keyInLS);
 
-  const addData = (newData) => {
-    setData((prevData) => [...prevData, newData]);
+  const addResponseData = async (formatter = data => data, restOfUrl = "") => {
+    const response = await axios.get(`${baseUrl}${restOfUrl}`);
+    setResponses(data => [...data, formatter(response.data)]);
   };
+
+  const clearResponses = () => setResponses([]);
+
+  return [responses, addResponseData, clearResponses];
+}
+
+function useLocalStorage(key, initialValue = []) {
+  if (localStorage.getItem(key)) {
+    initialValue = JSON.parse(localStorage.getItem(key));
+  }
+  const [value, setValue] = useState(initialValue);
 
   useEffect(() => {
-    axios
-      .get(url)
-      .then((response) => {
-        setData(response.data);
-      })
-      .catch((error) => {
-        console.log('Error fetching data:', error);
-      });
-  }, [url]);
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [value, key]);
 
-  return [data, addData];
-};
+  return [value, setValue];
+}
+
+export default useLocalStorage;
+
+export { useFlip, useAxios, useLocalStorage };

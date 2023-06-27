@@ -4,10 +4,9 @@ import "./PokemonCard.css";
 
 /* Renders a single pokemon card. */
 function PokemonCard({ front, back, name, stats }) {
-  const [isFacingUp, flipCard] = useFlip();
-
+  const [isFacingUp, flip] = useFlip();
   return (
-    <div onClick={flipCard} className="PokemonCard Card">
+    <div onClick={flip} className="PokemonCard Card">
       {isFacingUp ? (
         <div className="PokemonCard-front">
           <img src={front} alt={`{name} front`} />
@@ -29,7 +28,6 @@ function PokemonCard({ front, back, name, stats }) {
       )}
     </div>
   );
-};
-
+}
 
 export default PokemonCard;
